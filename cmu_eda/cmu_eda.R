@@ -4,5 +4,7 @@
 
 #usethis::create_github_token()
 
-install.packages("gitcreds")
-gitcreds::gitcreds_set()
+#install.packages("gitcreds")
+#gitcreds::gitcreds_set()
+                        
+library(tidyverse)

@@ -1,0 +1,18 @@
+---
+title: "maternal"
+author: "Joann"
+date: "2025-06-05"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+maternal <- read_csv("https://raw.githubusercontent.com/36-SURE/2025/main/data/maternal.csv")
+
+```
+
+```{r}
+
+View(maternal)
+
+```
