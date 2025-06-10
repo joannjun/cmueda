@@ -16,3 +16,89 @@ maternal <- read_csv("https://raw.githubusercontent.com/36-SURE/2025/main/data/m
 View(maternal)
 
 ```
+
+```{r}
+
+names(maternal)
+
+
+str(maternal)
+
+```
+```{r}
+
+# Data cleaning
+
+as.integer(maternal$PriorBirthsNowDeceased)
+
+```
+
+```{r}
+
+library(tidyverse)
+library(dplyr)
+
+sum(maternal$PriorBirthsNowDeceased == 'Unknown')
+sum(maternal$TobaccoUse == 'Unknown')
+sum(maternal$PrePregnancyDiabetes == 'Unknown')
+sum(maternal$PrePregnancyHypertension == 'Unknown')
+
+dim(maternal)
+
+
+ maternal |>
+  select(PriorBirthsNowDeceased, TobaccoUse, PrePregnancyDiabetes, PrePregnancyHypertension) |>
+  ggplot(aes(y = 'Yes')) +
+   stat_count(
+     mapping = NULL,
+     geom = "bar",
+     show.legend = NA
+     )
+ 
+ maternal |>
+  select(State, TobaccoUse) |>
+   mutate(YesTob == TobaccoUse["Yes"]) |>
+   ggplot(aes(x=State, y = YesTob))+
+   geom_line()+
+   facet_wrap(~stat, ncol=1)
+
+
+#maternal |>
+  #fill(PriorBirthsNowDeceased, .direction = "downup")
+
+```
+
+```{r}
+
+# 
+maternal |>
+  ggplot(aes(x=AverageNumberofPrenatalVisits)) +
+  geom_bar()
+
+```
+
+
+
+```{r}
+
+# install.packages('leaflet')
+library(leaflet)
+# install.packages('maps')
+library(maps)
+library(ggplot2)
+library(dplyr)
+# install.packages("mapproj")
+library(mapproj)
+
+```
+
+```{r}
+
+
+maternal %>% 
+  select()
+
+```
+
+
+

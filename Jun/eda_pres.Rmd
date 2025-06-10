@@ -1,0 +1,21 @@
+---
+title: "EDA Presentation"
+author: "Thomas, Gedeon, Joann"
+date: "2025-06-10"
+format: revealjs
+---
+
+
+# EDA Presentation
+
+## Questions
+
+
+## Visual 1
+
+
+## Visual 2
+
+
+## Cluster
+
