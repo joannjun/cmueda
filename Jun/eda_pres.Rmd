@@ -10,12 +10,29 @@ format: revealjs
 
 ## Questions
 
+1) 
 
-## Visual 1
+2) 
+
+## Visualization 1
+
+```{r}
 
 
-## Visual 2
+```
 
+## Visualization 2
+
+```{r}
+
+
+```
 
 ## Cluster
+
+
+```{r}
+
+
+```
 
