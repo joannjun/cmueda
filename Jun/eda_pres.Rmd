@@ -18,6 +18,8 @@ format: revealjs
 
 ```{r}
 
+|# echo = false
+
 library(dplyr)
 
 # cat var Yes = 1, No = 0, Unknown = NA (or 2)
@@ -81,6 +83,9 @@ cor.test(maternal_cluster$AverageNumberPrenatalVisits, maternal_cluster$Hyperten
 
 
 ```{r}
+
+|# echo = false
+  
 library(tidyverse)
 library(factoextra)
 library(ggplot2)
