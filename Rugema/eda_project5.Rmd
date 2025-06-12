@@ -1,0 +1,65 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+# Maternal healthcare disparities
+
+# Introduction
+The goal of this project is to explore maternal health disparities...
+
+# Objectives:
+- 
+- 
+```{r}
+library(tidyverse)
+library(ggcorrplot)
+maternal <- read_csv("https://raw.githubusercontent.com/36-SURE/2025/main/data/maternal.csv")
+```
+# Data Preparation
+```{r}
+
+```
+```{r}
+
+```
+
+```{r}
+
+```
+# Exploratory Data Analysis
+```{r}
+
+```
+
+
+```{r}
+
+```
+
+```{r}
+
+```
+
+
+```{r}
+
+```
+
+
+```{r}
+
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
+```{r}
+```
+
+
