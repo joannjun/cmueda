@@ -38,14 +38,127 @@ as.integer(maternal$PriorBirthsNowDeceased)
 library(tidyverse)
 library(dplyr)
 
-sum(maternal$PriorBirthsNowDeceased == 'Unknown')
-sum(maternal$TobaccoUse == 'Unknown')
-sum(maternal$PrePregnancyDiabetes == 'Unknown')
-sum(maternal$PrePregnancyHypertension == 'Unknown')
+PBND <- sum(maternal$PriorBirthsNowDeceased == 'Unknown')
+TU <- sum(maternal$TobaccoUse == 'Unknown')
+PPD <- sum(maternal$PrePregnancyDiabetes == 'Unknown')
+PPH <- sum(maternal$PrePregnancyHypertension == 'Unknown')
 
+missing <- c(PBND, TU, PPD, PPH)
+missing
+
+select(.maternal, 
+       rows)
+
+for i %in% maternal:
+  for k %in% m:
+    
 dim(maternal)
 
+```
 
+```{r}
+
+missing_data <- maternal %>%
+  filter(PriorBirthsNowDeceased == "Unknown" | 
+           TobaccoUse == "Unknown" | 
+           PrePregnancyDiabetes == "Unknown" | 
+           PrePregnancyHypertension == "Unknown") |>
+  select(State, PriorBirthsNowDeceased, TobaccoUse, PrePregnancyDiabetes, PrePregnancyHypertension)
+
+Yes_data <- maternal %>%
+  filter(PriorBirthsNowDeceased == "Yes" | 
+           TobaccoUse == "Yes" | 
+           PrePregnancyDiabetes == "Yes" | 
+           PrePregnancyHypertension == "Yes") |>
+  select(State, PriorBirthsNowDeceased, TobaccoUse, PrePregnancyDiabetes, PrePregnancyHypertension)
+
+No_data <- maternal %>%
+  filter(PriorBirthsNowDeceased == "No" | 
+           TobaccoUse == "No" | 
+           PrePregnancyDiabetes == "No" | 
+           PrePregnancyHypertension == "No") |>
+  select(State, PriorBirthsNowDeceased, TobaccoUse, PrePregnancyDiabetes, PrePregnancyHypertension)
+
+
+missing_data
+
+missing_data |>
+  ggplot(aes(x=State)) +
+  geom_bar()+
+  theme(axis.text.x = element_text(angle = 90)) # Rotate 90 degrees for vertical labels
+
+Yes_data |>
+  ggplot(aes(x=State)) +
+  geom_bar()+
+  theme(axis.text.x = element_text(angle = 90))+
+  arrange(desc())
+
+No_data |>
+  ggplot(aes(x=State)) +
+  geom_bar()+
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+
+```{r}
+
+tobacco_use <- maternal %>%
+  select(State, TobaccoUse) |>
+  group_by(State, TobaccoUse) |>
+  summarize(count=n(), .groups = "drops")
+
+tobacco_use
+
+tobacco_use <- tobacco_use %>%
+  group_by(State) %>%
+  mutate(total = sum(count)) %>%
+  ungroup()
+
+tobacco_use <- tobaccou_use |>
+  mutate(State = reorder(State, -total))
+
+
+  ggplot(tobacco_use, aes(x= State, y = count, fill = TobaccoUse)) +
+  geom_bar(position = "dodge", stat = "identity") +
+  labs(title = "Counts of Unique Values by Location",
+       x = "Location",
+       y = "Count") + 
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  
+
+
+#theme(axis.text.x = element_text(angle = 90)) # Rotate 90 degrees for vertical labels
+
+```
+
+
+```{r}
+
+missing_data |>
+  group_by(State) |>
+  summarize(PriorBirthsNowDeceased == "Unknown" | 
+           TobaccoUse == "Unknown" | 
+           PrePregnancyDiabetes == "Unknown" | 
+           PrePregnancyHypertension == "Unknown") 
+
+```
+
+```{r}
+  maternal |>
+    select(State, 
+           PriorBirthsNowDeceased, 
+           TobaccoUse, 
+           PrePregnancyDiabetes, 
+           PrePregnancyHypertension)|>
+    filter(PriorBirthsNowDeceased == "Unknown" | 
+           TobaccoUse == "Unknown" | 
+           PrePregnancyDiabetes == "Unknown" | 
+           PrePregnancyHypertension == "Unknown") |>
+    rowSums()
+
+```
+
+```{r}
  maternal |>
   select(PriorBirthsNowDeceased, TobaccoUse, PrePregnancyDiabetes, PrePregnancyHypertension) |>
   ggplot(aes(y = 'Yes')) +
@@ -63,8 +176,8 @@ dim(maternal)
    facet_wrap(~stat, ncol=1)
 
 
-#maternal |>
-  #fill(PriorBirthsNowDeceased, .direction = "downup")
+# maternal |>
+  # fill(PriorBirthsNowDeceased, .direction = "downup")
 
 ```
 
@@ -95,10 +208,217 @@ library(mapproj)
 ```{r}
 
 
-maternal %>% 
-  select()
+num_data <- maternal %>% 
+  select(State, Births, 
+         AverageMotherAge, 
+         AverageBirthWeight, 
+         AveragePrePregnancyBMI, 
+         AverageNumberPrenatalVisits)
+
+num_data |>
+  ggplot(aes(x=AverageBirthWeight))+
+  geom_histogram()
+
+
+(num_data)
+```
+
+```{r}
+
+
+
+num_data |>
+  ggplot(aes(x = State)) +
+  geom_histogram()
+
 
 ```
+
+```{r}
+
+library(dplyr)
+
+# Encode categorical variables: Yes = 1, No = 0, Unknown = NA (or 2 if you prefer)
+maternal_clean <- maternal %>%
+  mutate(
+    TobaccoUse_bin = case_when(
+      TobaccoUse == "Yes" ~ 1,
+      TobaccoUse == "No" ~ 0,
+      TobaccoUse == "Unknown" ~ NA_real_
+    ),
+    Diabetes_bin = case_when(
+      PrePregnancyDiabetes == "Yes" ~ 1,
+      PrePregnancyDiabetes == "No" ~ 0,
+      PrePregnancyDiabetes == "Unknown" ~ NA_real_
+    ),
+    Hypertension_bin = case_when(
+      PrePregnancyHypertension == "Yes" ~ 1,
+      PrePregnancyHypertension == "No" ~ 0,
+      PrePregnancyHypertension == "Unknown" ~ NA_real_
+    )
+  )
+
+
+```
+
+```{r}
+
+# Remove rows with NA in binary columns (optional)
+maternal_cluster <- maternal_clean %>%
+  filter(!is.na(TobaccoUse_bin) & !is.na(Diabetes_bin) & !is.na(Hypertension_bin))
+
+
+library(FactoMineR)
+library(factoextra)
+
+# Select features for PCA
+pca_data <- maternal_cluster %>%
+  select(TobaccoUse_bin, Diabetes_bin, Hypertension_bin,
+         AverageMotherAge, AverageBirthWeight,
+         AveragePrePregnancyBMI, AverageNumberPrenatalVisits,
+         AverageIntervalSinceLastBirth)
+
+# Run PCA
+pca_result <- PCA(pca_data, scale.unit = TRUE, graph = FALSE)
+
+# Visualize PCA
+fviz_pca_biplot(pca_result, repel = TRUE, label="none")
+
+```
+
+```{r}
+
+# Decide optimal number of clusters
+fviz_nbclust(pca_data, kmeans, method = "wss")
+
+# Run K-means with chosen number of clusters (say, 3)
+set.seed(123)
+kmeans_result <- kmeans(scale(pca_data), centers = 3, nstart = 25)
+
+# Add cluster label to data
+maternal_cluster$cluster <- as.factor(kmeans_result$cluster)
+
+# Visualize clusters on PCA plot
+fviz_cluster(kmeans_result, data = scale(pca_data))
+
+
+```
+
+Tobacco affect pre-pregnancy? (diabetes & hypertension)
+```{r}
+
+# Crosstabs
+table(maternal_cluster$TobaccoUse_bin, maternal_cluster$Diabetes_bin)
+table(maternal_cluster$TobaccoUse_bin, maternal_cluster$Hypertension_bin)
+
+# Chi-squared tests
+chisq.test(maternal_cluster$TobaccoUse_bin, maternal_cluster$Diabetes_bin)
+chisq.test(maternal_cluster$TobaccoUse_bin, maternal_cluster$Hypertension_bin)
+
+
+```
+
+
+
+# does using tobaccor or having pre-pregnancy diabetes or hypertension lead to greater amount of prenatal visits?
+
+```{r}
+
+library(ggplot2)
+
+# tobacco vs prenatal
+ggplot(maternal_cluster, aes(x = factor(TobaccoUse_bin), y = AverageNumberPrenatalVisits)) +
+  geom_boxplot() +
+  labs(x = "Tobacco Use (0=No, 1=Yes)", y = "Avg. Prenatal Visits")
+
+# diabetes vs prenatal
+ggplot(maternal_cluster, aes(x = factor(Diabetes_bin), y = AverageNumberPrenatalVisits)) +
+  geom_boxplot() +
+  labs(x = "Diabetes (0=No, 1=Yes)", y = "Avg. Prenatal Visits")
+
+# hypertension vs prenatal
+ggplot(maternal_cluster, aes(x = factor(Hypertension_bin), y = AverageNumberPrenatalVisits)) +
+  geom_boxplot() +
+  labs(x = "Hypertension (0=No, 1=Yes)", y = "Avg. Prenatal Visits")
+
+
+```
+- tobacco : not using tobacco has greater prenatal visits
+- diabetes - having diabetes has greater amount of prenatal visits
+- hypertension - having hypertension leads to greater amount of visits
+
+```{r}
+
+# correlation 
+cor.test(maternal_cluster$AverageNumberPrenatalVisits, maternal_cluster$TobaccoUse_bin)
+cor.test(maternal_cluster$AverageNumberPrenatalVisits, maternal_cluster$Diabetes_bin)
+cor.test(maternal_cluster$AverageNumberPrenatalVisits, maternal_cluster$Hypertension_bin)
+
+```
+- tobacco & prenatal : correlation = -0.3343532, p-value = <2.2E-16 --> there is correlation
+- diabetes & prenatal : correlation = 0.4447666, p-value = <2.2E-16 --> there is correlation
+- hypertension and prenatal: correlation = 0.283653, p-value = 1.44E-14 --> there is correlation
+- none of the confidence intervals contain 0 --> there is a relationship
+
+# mother age affect bmi?
+```{r}
+
+ggplot(maternal_cluster, aes(x = AverageMotherAge, y = AveragePrePregnancyBMI)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(x = "Mother's Age", y = "Pre-Pregnancy BMI")
+
+# Correlation
+cor.test(maternal_cluster$AverageMotherAge, maternal_cluster$AveragePrePregnancyBMI)
+
+
+```
+
+
+
+
+```{r}
+# install.packages("geojsonio")
+
+library(shiny)
+library(leaflet)
+library(dplyr)
+
+# load geojson
+us_states <- geojsonio::geojson_read("us-states.geojson", what = "sp")
+
+
+aggregated <- maternal %>%
+  group_by(State) %>%
+  summarise(AvgBMI = mean(AveragePrePregnancyBMI, na.rm = TRUE))
+
+# Merge with spatial data
+us_states@maternal <- left_join(us_states@maternal, aggregated, by = c("name" = "State"))
+
+ui <- fluidPage(
+  titlePanel("Pre-pregnancy BMI by State"),
+  leafletOutput("map")
+)
+
+server <- function(input, output, session) {
+  output$map <- renderLeaflet({
+    pal <- colorNumeric(palette = "YlOrRd", domain = us_states@maternal$AvgBMI)
+
+    leaflet(us_states) %>%
+      addProviderTiles("CartoDB.Positron") %>%
+      addPolygons(fillColor = ~pal(AvgBMI),
+                  fillOpacity = 0.7,
+                  color = "#BDBDC3",
+                  weight = 1,
+                  popup = ~paste(name, "<br>", "Avg BMI:", round(AvgBMI, 2))) %>%
+      addLegend(pal = pal, values = ~AvgBMI, title = "Avg Pre-Pregnancy BMI")
+  })
+}
+
+shinyApp(ui, server)
+
+```
+
 
 
 
