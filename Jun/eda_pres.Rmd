@@ -10,28 +10,150 @@ format: revealjs
 
 ## Questions
 
-1) 
+1) Is there a relationship between the number of prenatal visits and the mothers likelihood of having pre-pregnancy diabetes, pre-pregnancy hypertension, tobacco use?
 
-2) 
+2) Do certain states have higher BMI rates?
 
-## Visualization 1
+## Prenatal Visits Versus Risk Factors {.scrollable}
 
 ```{r}
+# cat var Yes = 1, No = 0, Unknown = NA (or 2)
 
+library(tidyverse)
+maternal <- read_csv("https://raw.githubusercontent.com/36-SURE/2025/main/data/maternal.csv")
+
+maternal_clean <- maternal %>%
+  mutate(
+    TobaccoUse_bin = case_when(
+      TobaccoUse == "Yes" ~ 1,
+      TobaccoUse == "No" ~ 0,
+      TobaccoUse == "Unknown" ~ NA_real_
+    ),
+    Diabetes_bin = case_when(
+      PrePregnancyDiabetes == "Yes" ~ 1,
+      PrePregnancyDiabetes == "No" ~ 0,
+      PrePregnancyDiabetes == "Unknown" ~ NA_real_
+    ),
+    Hypertension_bin = case_when(
+      PrePregnancyHypertension == "Yes" ~ 1,
+      PrePregnancyHypertension == "No" ~ 0,
+      PrePregnancyHypertension == "Unknown" ~ NA_real_
+    )
+  )
+
+# remove na in bin col
+maternal_cluster <- maternal_clean %>%
+  filter(!is.na(TobaccoUse_bin) & !is.na(Diabetes_bin) & !is.na(Hypertension_bin))
+
+
+
+library(ggplot2)
+
+library(tidyverse)
+
+# long format
+maternal_long <- maternal_cluster %>%
+  select(AverageNumberPrenatalVisits, TobaccoUse_bin, Diabetes_bin, Hypertension_bin) %>%
+  pivot_longer(cols = c(TobaccoUse_bin, Diabetes_bin, Hypertension_bin),
+               names_to = "Condition",
+               values_to = "ConditionValue")
+
+# plots
+ggplot(maternal_long, aes(x = factor(ConditionValue), y = AverageNumberPrenatalVisits)) +
+  geom_boxplot() +
+  facet_wrap(~ Condition, labeller = as_labeller(c(
+    TobaccoUse_bin = "Tobacco Use",
+    Diabetes_bin = "Diabetes",
+    Hypertension_bin = "Hypertension"
+  ))) +
+  labs(x = "Condition Present (0=No, 1=Yes)", y = "Avg. Prenatal Visits") +
+  theme_minimal()
+
+# correlation 
+#cor.test(maternal_cluster$AverageNumberPrenatalVisits, maternal_cluster$TobaccoUse_bin)
+#cor.test(maternal_cluster$AverageNumberPrenatalVisits, maternal_cluster$Diabetes_bin)
+#cor.test(maternal_cluster$AverageNumberPrenatalVisits, maternal_cluster$Hypertension_bin)
 
 ```
 
-## Visualization 2
+## State Vs BMI {.scollable}
 
 ```{r}
+# install.packages("plotly")
+# install.packages("rjson")
+library(plotly)
+library(rjson)
 
+data <- fromJSON(file="https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json")
+
+# full state name -> abbreviation
+state_abbr_lookup <- setNames(state.abb, state.name)
+
+# make column with the state abbreviations
+maternal_clean$code <- state_abbr_lookup[maternal_clean$State]
+
+# Check for any unmatched states (e.g., typos or non-standard names)
+if (any(is.na(maternal_clean$code))) {
+  warning("Some state names could not be matched to abbreviations:")
+  print(unique(maternal_clean$State[is.na(maternal_clean$code)]))
+}
+
+state_abbr_lookup["District of Columbia"] <- "DC"
+
+extras <- c(
+  "District of Columbia" = "DC",
+  "Puerto Rico" = "PR",
+  "Guam" = "GU",
+  "American Samoa" = "AS",
+  "Northern Mariana Islands" = "MP",
+  "U.S. Virgin Islands" = "VI"
+)
+
+# combine extras with other states
+state_abbr_lookup <- c(state_abbr_lookup, extras)
+
+# map full state names to abbreviations
+maternal_clean$code <- state_abbr_lookup[maternal_clean$State]
+
+unmatched <- unique(maternal_clean$State[is.na(maternal_clean$code)])
+if (length(unmatched) > 0) {
+  warning("Some state names could not be matched to abbreviations:")
+  print(unmatched)
+}
+
+maternal_clean$hover <- with(maternal_clean, paste(State, '<br>', AveragePrePregnancyBMI))
+# give state boundaries a white border
+l <- list(color = toRGB("white"), width = 2)
+# specify some map projection/options
+g <- list(
+  scope = 'usa',
+  projection = list(type = 'albers usa'),
+  showlakes = TRUE,
+  lakecolor = toRGB('white')
+)
+
+fig <- plot_geo(maternal_clean, locationmode = 'USA-states')
+fig <- fig %>% add_trace(
+    z = ~AveragePrePregnancyBMI, text = ~hover, locations = ~code,
+    color = ~AveragePrePregnancyBMI, colors = 'Purples'
+  )
+fig <- fig %>% colorbar(title = "Pre-Pregnancy BMI")
+fig <- fig %>% layout(
+    title = 'Pre-Pregnancy BMI)',
+    geo = g
+  )
+
+fig
 
 ```
 
-## Cluster
+## Cluster {.scrollable}
 
 
 ```{r}
+
+#| echo: false
+
 library(tidyverse)
 library(factoextra)
 library(ggplot2)
@@ -84,7 +206,7 @@ maternal_pca |>
 std_maternal <- num_maternal %>% 
   scale(center = TRUE, scale = TRUE)
 kmeans_maternal <- std_maternal |> 
-  kmeans(algorithm = "Lloyd", centers = 6, nstart = 30, iter.max = 25) 
+  kmeans(algorithm = "Lloyd", centers = 4, nstart = 30, iter.max = 25) 
 prcomp(std_maternal)
 #Visualize K-means with PCA
 kmeans_maternal |> 
@@ -99,3 +221,6 @@ std_maternal |>
 
 ```
 
+## Conclusion
+
+- 
