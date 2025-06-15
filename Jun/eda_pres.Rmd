@@ -2,7 +2,11 @@
 title: "EDA Presentation"
 author: "Thomas, Gedeon, Joann"
 date: "2025-06-10"
-format: revealjs
+format: 
+  revealjs:
+    theme: simple
+    transition: slide
+    
 ---
 
 
