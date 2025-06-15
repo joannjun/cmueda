@@ -4,62 +4,229 @@ output: html_notebook
 ---
 # Maternal healthcare disparities
 
-# Introduction
-The goal of this project is to explore maternal health disparities...
+## 🧭 Introduction
 
-# Objectives:
-- 
-- 
+This project explores a maternal healthcare dataset sourced from the CDC WONDER program. The dataset contains state-level aggregated birth records for 2019, including information on maternal characteristics (e.g., age, BMI), prenatal care (number of prenatal visits), birth outcomes (birth weight), and risk factors (tobacco use, pre-pregnancy diabetes, pre-pregnancy hypertension, prior infant deaths). Each row represents aggregated data for a state, including a set of key risk-indicator variables with summary statistics.
+
+Improving maternal and infant health is a priority for public health agencies, and this dataset allows us to investigate patterns, disparities, and potential risk groupings that might inform targeted interventions.
+
+---
+
+## 🎯 Objectives
+
+The goals of this analysis are:
+
+1. **Examine prenatal care by risk factors**  
+   Investigate whether mothers with certain risk factors (e.g., smoking, diabetes, hypertension) receive different levels of prenatal care.
+
+2. **Identify key associations**  
+   Use correlation analysis and visualizations to find the strongest relationships among numerical variables (e.g., age, BMI, birth weight, prenatal visits, interval since last birth).
+
+3. **Cluster maternal risk profiles**  
+   Reduce dimensionality using PCA and apply K-means clustering on the principal components to identify meaningful risk profile groups.
+
+4. **Map state-level risk profiles**  
+   Aggregate cluster assignments at the state level and visualize the geographic distribution of similar maternal risk profiles across the U.S.
+
+---
+
+## 🛠️ Project Workflow Overview
+
+| Step | Description |
+|------|-------------|
+| 1️⃣ Data Cleaning & Transformation | Handle missing values, encode categorical variables, remove `"Unknown"` entries |
+| 2️⃣ Exploratory Data Analysis | Create bar charts and scatter plots to explore relationships between risk factors and outcomes |
+| 3️⃣ Correlation Analysis | Generate a heatmap and perform pairwise scatter plots to identify strong numeric relationships |
+| 4️⃣ Dimensionality Reduction | Conduct PCA and examine explained variance and scree plots |
+| 5️⃣ Clustering | Perform K-means clustering on the first 4 principal components and determine optimal `k` |
+| 6️⃣ Geographic Visualization | Map cluster assignments to states to identify regional patterns |
+
+---
+
+*Proceed below to explore each step with code, visualizations, and interpretation.*  
 ```{r}
 library(tidyverse)
 library(ggcorrplot)
+library(cowplot)
+library(usmap)
+theme_set(theme_light())
 maternal <- read_csv("https://raw.githubusercontent.com/36-SURE/2025/main/data/maternal.csv")
 ```
-# Data Preparation
-```{r}
+## Data Preparation
+```{r message=FALSE, warning=FALSE}
+# Change PriorBirthsNowDeceased to numeric
+maternal$PriorBirthsNowDeceased <- as.numeric(maternal$PriorBirthsNowDeceased)
 
+# Handle numerical missing values
+# colSums(is.na(maternal))
+maternal <- maternal |>
+  mutate(across(where(is.numeric), ~ ifelse(is.na(.), mean(., na.rm = TRUE), .)))
+
+# Check and remove Unknowns
+# colSums(maternal == "Unknown", na.rm = TRUE)
+maternal <- maternal |>
+  filter_all(all_vars(. != "Unknown"))
+```
+## Exploratory Data Analysis
+```{r}
+summary(maternal)
+```
+### Question1:
+Does an increased number of prenatal visits correlate with risk factors (tobacco use, diabetes, hypertension)?
+```{r}
+# Create pivot table that will allow us to create facets
+maternal_visit <- maternal |>
+  pivot_longer(
+    cols = c(TobaccoUse, 
+             PrePregnancyDiabetes, 
+             PrePregnancyHypertension),
+    names_to = "risk_type",
+    values_to = "risk_value"
+  )
+maternal_visit |> 
+  ggplot(aes(x = risk_value,
+             y = AverageNumberPrenatalVisits,
+             fill = risk_value)) +
+  geom_bar(stat = "summary", fun = mean) +
+  facet_wrap(~ risk_type, nrow = 1) + 
+  labs(
+    title = "Average Prenatal Visits by Risk Factor",
+    x = "Risk Group",
+    y = "Average Prenatal Visits"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom", 
+        panel.spacing.x = unit(0.5, "cm"),
+        plot.title = element_text(hjust = 0.5,
+                                  size = 14,
+                                  face = "bold"))
+```
+### Question2:
+Are there strong correlations among the numeric variables in the data-set? If so, what are the most important ones, and how might they be related?
+```{r}
+# First let's have a correlation heat-map to tell us variables that correlated
+corr_data <- maternal |>
+  select(where(is.numeric))
+
+# Compute the correlation matrix  
+corr_matrix <- cor(corr_data, use = "complete.obs")
+ggcorrplot(corr_matrix,
+           method = "circle",
+           lab = TRUE, 
+           type = "lower", 
+           title = "Correlation Heatmap",
+           colors = c("red", "white", "blue")) +
+  theme(plot.title = element_text(hjust = 0.5,
+                                  size = 14,
+                                  face = "bold"))
 ```
 ```{r}
+# Plot 1: Mother's Age vs Pre-Pregnancy BMI
+plot1 <- maternal |>
+  ggplot(aes(x = AverageMotherAge, 
+             y = AveragePrePregnancyBMI)) +
+  geom_point(alpha = 0.5, color = "royalblue") +
+  geom_smooth(method = "lm", color = "black") +
+  labs(
+    title = "Mother's Age vs Pre-Pregnancy BMI",
+    x = "Average Mother Age",
+    y = "Average Pre-Pregnancy BMI"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5,
+                                  size = 14,
+                                  face = "bold"))
 
+# Plot 2: BMI vs Prenatal Visits
+plot2 <- maternal |>
+  ggplot(aes(x = AveragePrePregnancyBMI, 
+             y = AverageNumberPrenatalVisits)) +
+  geom_point(alpha = 0.5, color = "seagreen") +
+  geom_smooth(method = "lm", color = "black") +
+  labs(
+    title = "BMI vs Prenatal Visits",
+    x = "Average Pre-Pregnancy BMI",
+    y = "Average Number of Prenatal Visits"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5,
+                                  size = 14,
+                                  face = "bold"))
+
+plot_grid(plot1, plot2, nrow = 2)
 ```
+## Clustering analysis
+Do certain states form similar risk profiles?
+```{r message=FALSE, warning=FALSE}
+# Principal Component Analysis
+# Binary encoding 
+maternal <- maternal |>
+  mutate(across(c(TobaccoUse, 
+                   PrePregnancyDiabetes, 
+                   PrePregnancyHypertension), ~ as.numeric(. == "Yes")))
 
-```{r}
+risk_profile_vars <- maternal |>
+  select(-State, -Births, -id)
 
+# Apply PCA
+maternal_pca <- prcomp(risk_profile_vars, center = TRUE, scale. = TRUE)
+
+# Create a scree plot
+maternal_pca |>
+  fviz_eig(addlabels = TRUE) +
+  geom_hline(
+    yintercept = 100 * (1 / ncol(maternal_pca$x)),
+    linetype = "dashed",
+    color = "darkred"
+  )
 ```
-# Exploratory Data Analysis
+## Apply K-Means clustering
 ```{r}
+# Extract PC1, PC2, PC3 and PC4
+maternal_pca_data <- data.frame(maternal_pca$x[,1:4])
 
+# Determine number of clusters
+fviz_nbclust(maternal_pca_data,
+             FUNcluster = kmeans,
+             method = 'wss')
+
+set.seed(123)
+my_kmeans <- kmeans(maternal_pca_data, 
+                    centers = 4,
+                    nstart = 30)
+
+# Visualize the clusters
+fviz_pca_ind(maternal_pca, 
+             habillage = my_kmeans$cluster,
+             label = "none",
+             addEllipses = TRUE)
 ```
-
-
+## Visualize clusters by State
 ```{r}
+maternal_with_cluster <- maternal |>
+  bind_cols(cluster = my_kmeans$cluster)
 
-```
+state_clusters <- maternal_with_cluster |>
+  group_by(State, cluster) |>
+  summarise(count = n(), .groups = 'drop') |>
+  group_by(State) |> 
+  slice_max(order_by = count, n = 1)
 
-```{r}
+# Make sure 'state' is lowercase and 'cluster' is a factor
+state_clusters <- state_clusters |>
+  rename(state = State) |>
+  mutate(cluster = as.factor(cluster))
 
-```
-
-
-```{r}
-
-```
-
-
-```{r}
-
-```
-
-
-```{r}
-```
-
-
-```{r}
-```
-
-
-```{r}
+plot_usmap(data = state_clusters, 
+           values = 'cluster', 
+           regions = 'states') +
+  scale_fill_manual(values = c("1" = "red",
+                               "2" = "green", 
+                               "3" = "blue",
+                               "4" = "purple"),
+                    name = "cluster") +
+  labs(title = "U.S. States by Maternal Risk Profile Cluster") +
+  theme_minimal()
 ```
 
 
