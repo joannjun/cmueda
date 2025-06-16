@@ -149,79 +149,8 @@ fig
 
 ```
 
-## Cluster {.scrollable}
+## Infant Mortality Versus Other Numerical Values {.scrollable}
 
-
-```{r}
-
-library(tidyverse)
-library(factoextra)
-library(ggplot2)
-library(ggmosaic)
-maternal <- read_csv("https://raw.githubusercontent.com/36-SURE/2025/main/data/maternal.csv")
-maternal <- as.tibble(maternal)
-maternal[maternal == "Unknown"] <- NA
-maternal$PriorBirthsNowDeceased <- as.numeric(maternal$PriorBirthsNowDeceased)
-maternal <- maternal %>% 
-  drop_na(State, PriorBirthsNowDeceased, 
-          TobaccoUse, PrePregnancyDiabetes, 
-          PrePregnancyHypertension)
-maternal<- maternal %>% 
-  mutate(BiTobaccoUse = ifelse(TobaccoUse == "Yes", 1, 0),
-         BiPrePregnancyDiabetes = ifelse(PrePregnancyDiabetes == "Yes", 1, 0),
-         BiPrePregnancyHypertension = ifelse(PrePregnancyHypertension == "Yes", 1, 0))
-num_maternal <- maternal %>% 
-  select(PriorBirthsNowDeceased, Births, AveragePrePregnancyBMI, AverageMotherAge,
-         AverageBirthWeight, AverageNumberPrenatalVisits, AverageIntervalSinceLastBirth,
-         BiPrePregnancyDiabetes,BiPrePregnancyHypertension,BiTobaccoUse)
-maternal_pca <- prcomp(num_maternal, center = TRUE, scale. = TRUE)
-summary(maternal_pca)
-maternal_pc_matrix <- maternal_pca$x
-head(maternal_pc_matrix)
-maternal_pca$rotation
-maternal <- maternal |> 
-  mutate(pc1 = maternal_pc_matrix[,1], 
-         pc2 = maternal_pc_matrix[,2])
-maternal |> 
-  ggplot(aes(x = pc1, y = pc2)) +
-  geom_point(alpha = 0.5) +
-  labs(x = "PC 1", y = "PC 2")
-#PCA Biplot
-maternal_pca |> 
-  fviz_pca_biplot(label = "var",
-                  alpha.ind = 0.25,
-                  alpha.var = 0.75,
-                  labelsize = 5,
-                  col.var = "darkblue",
-                  repel = TRUE)
-#Elbow Plot for PCA
-maternal_pca |> 
-  fviz_eig(addlabels = TRUE) +
-  geom_hline(
-    yintercept = 100 * (1 / ncol(maternal_pca$x)), 
-    linetype = "dashed", 
-    color = "darkred",
-  )
-#Standardized chosen data & k-means clustered
-std_maternal <- num_maternal %>% 
-  scale(center = TRUE, scale = TRUE)
-kmeans_maternal <- std_maternal |> 
-  kmeans(algorithm = "Lloyd", centers = 4, nstart = 30, iter.max = 25) 
-prcomp(std_maternal)
-#Visualize K-means with PCA
-kmeans_maternal |> 
-  fviz_cluster(data = std_maternal,
-               geom = "point",
-               ellipse = FALSE) +
-  ggthemes::scale_color_colorblind() + 
-  theme_light()
-#K-means cluster elbow plot
-std_maternal |> 
-  fviz_nbclust(kmeans, method = "wss")
-
-```
-
-## Cluster {.scrollable}
 
 ```{r}
 
@@ -239,26 +168,63 @@ maternal <- maternal %>%
   drop_na(State, PriorBirthsNowDeceased, 
           TobaccoUse, PrePregnancyDiabetes, 
           PrePregnancyHypertension)
-maternal<- maternal %>% 
-  mutate(BiTobaccoUse = ifelse(TobaccoUse == "Yes", 1, 0),
-         BiPrePregnancyDiabetes = ifelse(PrePregnancyDiabetes == "Yes", 1, 0),
-         BiPrePregnancyHypertension = ifelse(PrePregnancyHypertension == "Yes", 1, 0))
 num_maternal <- maternal %>% 
-  select(PriorBirthsNowDeceased, Births, AveragePrePregnancyBMI, AverageMotherAge,
-         AverageBirthWeight, AverageNumberPrenatalVisits, AverageIntervalSinceLastBirth,
-         BiPrePregnancyDiabetes,BiPrePregnancyHypertension,BiTobaccoUse)
+  select(PriorBirthsNowDeceased, 
+         AverageMotherAge, AverageBirthWeight,    
+         AverageIntervalSinceLastBirth, AverageNumberPrenatalVisits)
 maternal_pca <- prcomp(num_maternal, center = TRUE, scale. = TRUE)
-summary(maternal_pca)
 maternal_pc_matrix <- maternal_pca$x
-head(maternal_pc_matrix)
-maternal_pca$rotation
 maternal <- maternal |> 
   mutate(pc1 = maternal_pc_matrix[,1], 
          pc2 = maternal_pc_matrix[,2])
-maternal |> 
-  ggplot(aes(x = pc1, y = pc2)) +
-  geom_point(alpha = 0.5) +
-  labs(x = "PC 1", y = "PC 2")
+#PCA Biplot
+maternal_pca |> 
+  fviz_pca_biplot(label = "var",
+                  alpha.ind = 0.25,
+                  alpha.var = 0.75,
+                  labelsize = 5,
+                  col.var = "darkblue",
+                  repel = TRUE)
+#Standardized chosen data & k-means clustered
+std_maternal <- num_maternal %>% 
+  scale(center = TRUE, scale = TRUE)
+kmeans_maternal <- std_maternal |> 
+  kmeans(algorithm = "Lloyd", centers = 2, nstart = 30, iter.max = 25) 
+#Visualize K-means with PCA
+kmeans_maternal |> 
+  fviz_cluster(data = std_maternal,
+               geom = "point",
+               ellipse = FALSE) +
+  ggthemes::scale_color_colorblind() +
+  theme_light()
+
+```
+
+## Tobacco, Diabetes, And Hypertensions Negative Effects on Infants {.scrollable}
+
+
+```{r}
+
+#| echo: false
+
+library(tidyverse)
+library(factoextra)
+library(ggplot2)
+library(ggmosaic)
+maternal <- read_csv("https://raw.githubusercontent.com/36-SURE/2025/main/data/maternal.csv")
+maternal <- as.tibble(maternal)
+maternal[maternal == "Unknown"] <- NA
+maternal$PriorBirthsNowDeceased <- as.numeric(maternal$PriorBirthsNowDeceased)
+maternal <- maternal %>% 
+  drop_na(State, PriorBirthsNowDeceased, 
+          TobaccoUse, PrePregnancyDiabetes, 
+          PrePregnancyHypertension)
+num_maternal <- maternal %>% 
+  select(PriorBirthsNowDeceased, AveragePrePregnancyBMI, 
+         AverageMotherAge, AverageBirthWeight,    
+         AverageIntervalSinceLastBirth, AverageNumberPrenatalVisits)
+std_maternal <- num_maternal %>% 
+  scale(center = TRUE, scale = TRUE)
 ### TA Hard Code
 df.testing <- as.data.frame(std_maternal)
 df.testing$TobaccoUse <- maternal$TobaccoUse
@@ -275,7 +241,7 @@ inter <- interaction(maternal$TobaccoUse, maternal$PrePregnancyDiabetes, materna
 ggplot(df.testing, aes(x = PC1, y = PC2, color = inter, shape=as.factor(cluster))) +
   geom_point(alpha = 0.7, size = 2.5) +
   scale_color_brewer(palette = "Dark2") +
-  labs(color = "Tobacco × Diabetes") +
+  labs(color = "Tobacco × Diabetes x Hypertension") +
   theme_minimal()
 
 ```
