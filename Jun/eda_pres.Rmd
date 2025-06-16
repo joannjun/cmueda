@@ -185,6 +185,10 @@ maternal_pca |>
                   labelsize = 5,
                   col.var = "darkblue",
                   repel = TRUE)
+std_maternal <- num_maternal %>% 
+  scale(center = TRUE, scale = TRUE)
+kmeans_maternal <- std_maternal |> 
+  kmeans(algorithm = "Lloyd", centers = 2, nstart = 30, iter.max = 25) 
 
 ```
 
