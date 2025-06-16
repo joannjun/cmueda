@@ -13,9 +13,9 @@ format:
 
 ## Questions
 
-1) Is there a relationship between the number of prenatal visits and the mothers likelihood of having pre-pregnancy diabetes, pre-pregnancy hypertension, tobacco use?
+1) Do certain states have higher BMI rates?
 
-2) Do certain states have higher BMI rates?
+2) Examining how prenatal care visits relate to maternal health risk factors (diabetes, hypertension and tobacco use)
 
 ## Prenatal Visits Versus Risk Factors {.scrollable}
 
@@ -282,4 +282,6 @@ ggplot(df.testing, aes(x = PC1, y = PC2, color = inter, shape=as.factor(cluster)
 
 ## Conclusion
 
-- 
+- More prenatal visits observed for mothers with diabetes or hypertension.
+
+- Fewer visits among tobacco users may signal gaps in care outreach.
