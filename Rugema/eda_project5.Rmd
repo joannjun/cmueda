@@ -4,7 +4,7 @@ output: html_notebook
 ---
 # Maternal healthcare disparities
 
-## 🧭 Introduction
+## Introduction
 
 This project explores a maternal healthcare dataset sourced from the CDC WONDER program. The dataset contains state-level aggregated birth records for 2019, including information on maternal characteristics (e.g., age, BMI), prenatal care (number of prenatal visits), birth outcomes (birth weight), and risk factors (tobacco use, pre-pregnancy diabetes, pre-pregnancy hypertension, prior infant deaths). Each row represents aggregated data for a state, including a set of key risk-indicator variables with summary statistics.
 
@@ -12,7 +12,7 @@ Improving maternal and infant health is a priority for public health agencies, a
 
 ---
 
-## 🎯 Objectives
+## Objectives
 
 The goals of this analysis are:
 
@@ -30,16 +30,7 @@ The goals of this analysis are:
 
 ---
 
-## 🛠️ Project Workflow Overview
-
-| Step | Description |
-|------|-------------|
-| 1️⃣ Data Cleaning & Transformation | Handle missing values, encode categorical variables, remove `"Unknown"` entries |
-| 2️⃣ Exploratory Data Analysis | Create bar charts and scatter plots to explore relationships between risk factors and outcomes |
-| 3️⃣ Correlation Analysis | Generate a heatmap and perform pairwise scatter plots to identify strong numeric relationships |
-| 4️⃣ Dimensionality Reduction | Conduct PCA and examine explained variance and scree plots |
-| 5️⃣ Clustering | Perform K-means clustering on the first 4 principal components and determine optimal `k` |
-| 6️⃣ Geographic Visualization | Map cluster assignments to states to identify regional patterns |
+## Project Workflow Overview
 
 ---
 
@@ -203,30 +194,6 @@ fviz_pca_ind(maternal_pca,
 ```
 ## Visualize clusters by State
 ```{r}
-maternal_with_cluster <- maternal |>
-  bind_cols(cluster = my_kmeans$cluster)
-
-state_clusters <- maternal_with_cluster |>
-  group_by(State, cluster) |>
-  summarise(count = n(), .groups = 'drop') |>
-  group_by(State) |> 
-  slice_max(order_by = count, n = 1)
-
-# Make sure 'state' is lowercase and 'cluster' is a factor
-state_clusters <- state_clusters |>
-  rename(state = State) |>
-  mutate(cluster = as.factor(cluster))
-
-plot_usmap(data = state_clusters, 
-           values = 'cluster', 
-           regions = 'states') +
-  scale_fill_manual(values = c("1" = "red",
-                               "2" = "green", 
-                               "3" = "blue",
-                               "4" = "purple"),
-                    name = "cluster") +
-  labs(title = "U.S. States by Maternal Risk Profile Cluster") +
-  theme_minimal()
 ```
 
 
