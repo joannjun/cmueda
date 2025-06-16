@@ -17,69 +17,7 @@ format:
 
 2) Examining how prenatal care visits relate to maternal health risk factors (diabetes, hypertension and tobacco use)
 
-## Prenatal Visits Versus Risk Factors {.scrollable}
-
-```{r}
-# cat var Yes = 1, No = 0, Unknown = NA (or 2)
-
-library(tidyverse)
-maternal <- read_csv("https://raw.githubusercontent.com/36-SURE/2025/main/data/maternal.csv")
-
-maternal_clean <- maternal %>%
-  mutate(
-    TobaccoUse_bin = case_when(
-      TobaccoUse == "Yes" ~ 1,
-      TobaccoUse == "No" ~ 0,
-      TobaccoUse == "Unknown" ~ NA_real_
-    ),
-    Diabetes_bin = case_when(
-      PrePregnancyDiabetes == "Yes" ~ 1,
-      PrePregnancyDiabetes == "No" ~ 0,
-      PrePregnancyDiabetes == "Unknown" ~ NA_real_
-    ),
-    Hypertension_bin = case_when(
-      PrePregnancyHypertension == "Yes" ~ 1,
-      PrePregnancyHypertension == "No" ~ 0,
-      PrePregnancyHypertension == "Unknown" ~ NA_real_
-    )
-  )
-
-# remove na in bin col
-maternal_cluster <- maternal_clean %>%
-  filter(!is.na(TobaccoUse_bin) & !is.na(Diabetes_bin) & !is.na(Hypertension_bin))
-
-
-
-library(ggplot2)
-
-library(tidyverse)
-
-# long format
-maternal_long <- maternal_cluster %>%
-  select(AverageNumberPrenatalVisits, TobaccoUse_bin, Diabetes_bin, Hypertension_bin) %>%
-  pivot_longer(cols = c(TobaccoUse_bin, Diabetes_bin, Hypertension_bin),
-               names_to = "Condition",
-               values_to = "ConditionValue")
-
-# plots
-ggplot(maternal_long, aes(x = factor(ConditionValue), y = AverageNumberPrenatalVisits)) +
-  geom_boxplot() +
-  facet_wrap(~ Condition, labeller = as_labeller(c(
-    TobaccoUse_bin = "Tobacco Use",
-    Diabetes_bin = "Diabetes",
-    Hypertension_bin = "Hypertension"
-  ))) +
-  labs(x = "Condition Present (0=No, 1=Yes)", y = "Avg. Prenatal Visits") +
-  theme_minimal()
-
-# correlation 
-#cor.test(maternal_cluster$AverageNumberPrenatalVisits, maternal_cluster$TobaccoUse_bin)
-#cor.test(maternal_cluster$AverageNumberPrenatalVisits, maternal_cluster$Diabetes_bin)
-#cor.test(maternal_cluster$AverageNumberPrenatalVisits, maternal_cluster$Hypertension_bin)
-
-```
-
-## Visualization 2 {.scollable}
+## States vs. BMI {.scollable}
 
 ```{r}
 
@@ -148,6 +86,69 @@ fig <- fig %>% layout(
 fig
 
 ```
+
+## Prenatal Visits Versus Risk Factors {.scrollable}
+
+```{r}
+# cat var Yes = 1, No = 0, Unknown = NA (or 2)
+
+library(tidyverse)
+maternal <- read_csv("https://raw.githubusercontent.com/36-SURE/2025/main/data/maternal.csv")
+
+maternal_clean <- maternal %>%
+  mutate(
+    TobaccoUse_bin = case_when(
+      TobaccoUse == "Yes" ~ 1,
+      TobaccoUse == "No" ~ 0,
+      TobaccoUse == "Unknown" ~ NA_real_
+    ),
+    Diabetes_bin = case_when(
+      PrePregnancyDiabetes == "Yes" ~ 1,
+      PrePregnancyDiabetes == "No" ~ 0,
+      PrePregnancyDiabetes == "Unknown" ~ NA_real_
+    ),
+    Hypertension_bin = case_when(
+      PrePregnancyHypertension == "Yes" ~ 1,
+      PrePregnancyHypertension == "No" ~ 0,
+      PrePregnancyHypertension == "Unknown" ~ NA_real_
+    )
+  )
+
+# remove na in bin col
+maternal_cluster <- maternal_clean %>%
+  filter(!is.na(TobaccoUse_bin) & !is.na(Diabetes_bin) & !is.na(Hypertension_bin))
+
+
+
+library(ggplot2)
+
+library(tidyverse)
+
+# long format
+maternal_long <- maternal_cluster %>%
+  select(AverageNumberPrenatalVisits, TobaccoUse_bin, Diabetes_bin, Hypertension_bin) %>%
+  pivot_longer(cols = c(TobaccoUse_bin, Diabetes_bin, Hypertension_bin),
+               names_to = "Condition",
+               values_to = "ConditionValue")
+
+# plots
+ggplot(maternal_long, aes(x = factor(ConditionValue), y = AverageNumberPrenatalVisits)) +
+  geom_boxplot() +
+  facet_wrap(~ Condition, labeller = as_labeller(c(
+    TobaccoUse_bin = "Tobacco Use",
+    Diabetes_bin = "Diabetes",
+    Hypertension_bin = "Hypertension"
+  ))) +
+  labs(x = "Condition Present (0=No, 1=Yes)", y = "Avg. Prenatal Visits") +
+  theme_minimal()
+
+# correlation 
+#cor.test(maternal_cluster$AverageNumberPrenatalVisits, maternal_cluster$TobaccoUse_bin)
+#cor.test(maternal_cluster$AverageNumberPrenatalVisits, maternal_cluster$Diabetes_bin)
+#cor.test(maternal_cluster$AverageNumberPrenatalVisits, maternal_cluster$Hypertension_bin)
+
+```
+
 
 ## Infant Mortality Versus Other Numerical Values {.scrollable}
 
