@@ -10,17 +10,14 @@ format:
     
 ---
 
-## Data
+## Data {.scrollable}
 
-- `State`
-- `PriorBirthsNowDeceased`
-- `TobaccoUse`
-- `PrePregnancyDiabetes`
-- `PrePregnancyHypertension`
+- 12 columns
+- Aggregated by `State`, `PriorBirthsNowDeceased`, `TobaccoUse`, `PrePregnancyDiabetes`, `PrePregnancyHypertension`
 - `Births`
 - `AverageMotherAge`
 - `AverageBirthWeight`
-- `AveragePrePregnancnyBMI`
+- `AveragePrePregnancyBMI`
 - `AverageNumberPrenatalVisits`
 - `AverageIntervalSinceLastBirth`
 
