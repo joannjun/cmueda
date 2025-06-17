@@ -15,7 +15,7 @@ format:
 
 2) Does the amount of prenatal care visits relate to maternal health risk factors (diabetes, hypertension and tobacco use)
 
-## States vs. BMI {.scollable}
+## States vs. BMI {auto-animate=true}
 
 ```{r}
 # cat var Yes = 1, No = 0, Unknown = NA (or 2)
@@ -112,7 +112,7 @@ fig <- fig %>% add_trace(
     )
 fig <- fig %>% colorbar(title = "BMI")
 fig <- fig %>% layout(
-    title = 'Pre-Pregnancy BMI (No Tobacco, Hypertension, Diabetes)',
+    title = 'Pre-Pregnancy BMI of the United States of America',
     geo = g
   )
 
