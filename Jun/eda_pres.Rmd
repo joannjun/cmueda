@@ -120,13 +120,6 @@ fig
 
 ```
 
-```{r}
-View(maternal_clean_map)
-
-```
-
-```
-
 ## Prenatal Visits Versus Risk Factors {.scrollable}
 
 ```{r}
