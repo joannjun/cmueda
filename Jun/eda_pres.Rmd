@@ -10,6 +10,20 @@ format:
     
 ---
 
+## Data
+
+- `State`
+- `PriorBirthsNowDeceased`
+- `TobaccoUse`
+- `PrePregnancyDiabetes`
+- `PrePregnancyHypertension`
+- `Births`
+- `AverageMotherAge`
+- `AverageBirthWeight`
+- `AveragePrePregnancnyBMI`
+- `AverageNumberPrenatalVisits`
+- `AverageIntervalSinceLastBirth`
+
 ## Questions
 
 1) Do certain states have higher BMI rates?
