@@ -154,7 +154,7 @@ ggplot(maternal_long, aes(x = factor(ConditionValue), y = AverageNumberPrenatalV
 
 ```
 
-## Infant Mortality Versus Other Numerical Values {.scrollable}
+## Infant Mortality Versus Prenatal Visits {.scrollable}
 
 ```{r}
 
