@@ -89,7 +89,10 @@ if (length(unmatched) > 0) {
 
 maternal_clean_map <- maternal_clean |>
   filter(!is.na(AveragePrePregnancyBMI)) |>
-  filter(TobaccoUse_bin == 0, Diabetes_bin == 0, Hypertension_bin == 0)
+  filter(TobaccoUse_bin == 0, Diabetes_bin == 0, Hypertension_bin == 0, PriorBirthsNowDeceased == 0)
+
+maternal_clean_map <- maternal_clean_map %>%
+  filter(!is.na(code), !is.na(AveragePrePregnancyBMI))
 
 maternal_clean_map$hover <- with(maternal_clean_map, paste(State, AveragePrePregnancyBMI))
 # give state boundaries a white border
@@ -105,17 +108,22 @@ g <- list(
 fig <- plot_geo(maternal_clean_map, locationmode = 'USA-states')
 fig <- fig %>% add_trace(
     z = ~AveragePrePregnancyBMI, text = ~hover, locations = ~code,
-    color = ~AveragePrePregnancyBMI, colors = 'Purples',
-    zmin = min(maternal_clean_map$AveragePrePregnancyBMI, na.rm = TRUE),
-    zmax = max(maternal_clean_map$AveragePrePregnancyBMI, na.rm = TRUE)
-  )
-fig <- fig %>% colorbar(title = "Pre-Pregnancy BMI")
+    color = ~AveragePrePregnancyBMI, colors = 'Purples'
+    )
+fig <- fig %>% colorbar(title = "BMI")
 fig <- fig %>% layout(
     title = 'Pre-Pregnancy BMI (No Tobacco, Hypertension, Diabetes)',
     geo = g
   )
 
 fig
+
+```
+
+```{r}
+View(maternal_clean_map)
+
+```
 
 ```
 
