@@ -1,5 +1,5 @@
 ---
-title: "EDA Presentation"
+title: "Maternal Healthcare Disparities"
 author: "Thomas, Gedeon, Joann"
 date: "2025-06-10"
 format: 
@@ -9,85 +9,13 @@ format:
     
 ---
 
-# EDA Presentation
-
 ## Questions
 
 1) Do certain states have higher BMI rates?
 
-2) Examining how prenatal care visits relate to maternal health risk factors (diabetes, hypertension and tobacco use)
+2) Does the amount of prenatal care visits relate to maternal health risk factors (diabetes, hypertension and tobacco use)
 
 ## States vs. BMI {.scollable}
-
-```{r}
-
-library(plotly)
-library(rjson)
-
-data <- fromJSON(file="https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json")
-
-# full state name -> abbreviation
-state_abbr_lookup <- setNames(state.abb, state.name)
-
-# make column with the state abbreviations
-maternal_clean$code <- state_abbr_lookup[maternal_clean$State]
-
-# Check for any unmatched states (e.g., typos or non-standard names)
-if (any(is.na(maternal_clean$code))) {
-  warning("Some state names could not be matched to abbreviations:")
-  print(unique(maternal_clean$State[is.na(maternal_clean$code)]))
-}
-
-state_abbr_lookup["District of Columbia"] <- "DC"
-
-extras <- c(
-  "District of Columbia" = "DC",
-  "Puerto Rico" = "PR",
-  "Guam" = "GU",
-  "American Samoa" = "AS",
-  "Northern Mariana Islands" = "MP",
-  "U.S. Virgin Islands" = "VI"
-)
-
-# combine extras with other states
-state_abbr_lookup <- c(state_abbr_lookup, extras)
-
-# map full state names to abbreviations
-maternal_clean$code <- state_abbr_lookup[maternal_clean$State]
-
-unmatched <- unique(maternal_clean$State[is.na(maternal_clean$code)])
-if (length(unmatched) > 0) {
-  warning("Some state names could not be matched to abbreviations:")
-  print(unmatched)
-}
-
-maternal_clean$hover <- with(maternal_clean, paste(State, '<br>', AveragePrePregnancyBMI))
-# give state boundaries a white border
-l <- list(color = toRGB("white"), width = 2)
-# specify some map projection/options
-g <- list(
-  scope = 'usa',
-  projection = list(type = 'albers usa'),
-  showlakes = TRUE,
-  lakecolor = toRGB('white')
-)
-
-fig <- plot_geo(maternal_clean, locationmode = 'USA-states')
-fig <- fig %>% add_trace(
-    z = ~AveragePrePregnancyBMI, text = ~hover, locations = ~code,
-    color = ~AveragePrePregnancyBMI, colors = 'Purples'
-  )
-fig <- fig %>% colorbar(title = "Pre-Pregnancy BMI")
-fig <- fig %>% layout(
-    title = 'Pre-Pregnancy BMI)',
-    geo = g
-  )
-
-fig
-
-```
-
-## Prenatal Visits Versus Risk Factors {.scrollable}
 
 ```{r}
 # cat var Yes = 1, No = 0, Unknown = NA (or 2)
@@ -119,6 +47,81 @@ maternal_cluster <- maternal_clean %>%
   filter(!is.na(TobaccoUse_bin) & !is.na(Diabetes_bin) & !is.na(Hypertension_bin))
 
 
+library(plotly)
+library(rjson)
+
+data <- fromJSON(file="https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json")
+
+# full state name -> abbreviation
+state_abbr_lookup <- setNames(state.abb, state.name)
+
+# make column with the state abbreviations
+maternal_clean$code <- state_abbr_lookup[maternal_clean$State]
+
+# Check for any unmatched states (e.g., typos or non-standard names)
+#if (any(is.na(maternal_clean$code))) {
+  #warning("Some state names could not be matched to abbreviations:")
+  #print(unique(maternal_clean$State[is.na(maternal_clean$code)]))
+#}
+
+state_abbr_lookup["District of Columbia"] <- "DC"
+
+extras <- c(
+  "District of Columbia" = "DC",
+  "Puerto Rico" = "PR",
+  "Guam" = "GU",
+  "American Samoa" = "AS",
+  "Northern Mariana Islands" = "MP",
+  "U.S. Virgin Islands" = "VI"
+)
+
+# combine extras with other states
+state_abbr_lookup <- c(state_abbr_lookup, extras)
+
+# map full state names to abbreviations
+maternal_clean$code <- state_abbr_lookup[maternal_clean$State]
+
+unmatched <- unique(maternal_clean$State[is.na(maternal_clean$code)])
+if (length(unmatched) > 0) {
+  warning("Some state names could not be matched to abbreviations:")
+  print(unmatched)
+}
+
+maternal_clean_map <- maternal_clean |>
+  filter(!is.na(AveragePrePregnancyBMI)) |>
+  filter(TobaccoUse_bin == 0, Diabetes_bin == 0, Hypertension_bin == 0)
+
+maternal_clean_map$hover <- with(maternal_clean_map, paste(State, AveragePrePregnancyBMI))
+# give state boundaries a white border
+l <- list(color = toRGB("white"), width = 2)
+# specify some map projection/options
+g <- list(
+  scope = 'usa',
+  projection = list(type = 'albers usa'),
+  showlakes = TRUE,
+  lakecolor = toRGB('white')
+)
+
+fig <- plot_geo(maternal_clean_map, locationmode = 'USA-states')
+fig <- fig %>% add_trace(
+    z = ~AveragePrePregnancyBMI, text = ~hover, locations = ~code,
+    color = ~AveragePrePregnancyBMI, colors = 'Purples',
+    zmin = min(maternal_clean_map$AveragePrePregnancyBMI, na.rm = TRUE),
+    zmax = max(maternal_clean_map$AveragePrePregnancyBMI, na.rm = TRUE)
+  )
+fig <- fig %>% colorbar(title = "Pre-Pregnancy BMI")
+fig <- fig %>% layout(
+    title = 'Pre-Pregnancy BMI (No Tobacco, Hypertension, Diabetes)',
+    geo = g
+  )
+
+fig
+
+```
+
+## Prenatal Visits Versus Risk Factors {.scrollable}
+
+```{r}
 
 library(ggplot2)
 
@@ -149,9 +152,7 @@ ggplot(maternal_long, aes(x = factor(ConditionValue), y = AverageNumberPrenatalV
 
 ```
 
-
 ## Infant Mortality Versus Other Numerical Values {.scrollable}
-
 
 ```{r}
 
@@ -194,7 +195,6 @@ kmeans_maternal <- std_maternal |>
 ```
 
 ## Tobacco, Diabetes, And Hypertensions Negative Effects on Infants {.scrollable}
-
 
 ```{r}
 
@@ -244,3 +244,5 @@ ggplot(df.testing, aes(x = PC1, y = PC2, color = inter, shape=as.factor(cluster)
 - More prenatal visits observed for mothers with diabetes or hypertension.
 
 - Fewer visits among tobacco users may signal gaps in care outreach.
+
+- There are regional differences in BMI
