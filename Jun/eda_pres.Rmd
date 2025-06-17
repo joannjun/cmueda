@@ -195,7 +195,7 @@ kmeans_maternal <- std_maternal |>
 
 ```
 
-## Tobacco, Diabetes, And Hypertensions Negative Effects on Infants {.scrollable}
+## Tobacco, Diabetes, And Hypertensions Effects on Infants {.scrollable}
 
 ```{r}
 
@@ -247,3 +247,6 @@ ggplot(df.testing, aes(x = PC1, y = PC2, color = inter, shape=as.factor(cluster)
 - Fewer visits among tobacco users may signal gaps in care outreach.
 
 - There are regional differences in BMI
+
+- Despite having more health conditions, mothers who visit the doctor more often seem to have better infant health outcomes
+
